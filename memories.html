@@ -114,19 +114,18 @@
             z-index: 10;
             position: relative;
             
-            /* Gradient for the "Light" effect */
+            /* Revised Gradient: Added positive offsets to cover more text at the start */
             background: linear-gradient(
                 to bottom,
                 #fff 0%, 
-                #ffeb3b calc(var(--scroll-percent) - 5%), 
-                #fff calc(var(--scroll-percent)),
-                rgba(255, 255, 255, 0.1) calc(var(--scroll-percent) + 5%)
+                #ffeb3b calc(var(--scroll-percent) + 15%), /* Pushes gold further down */
+                #fff calc(var(--scroll-percent) + 20%),    /* Extends the bright white */
+                rgba(255, 255, 255, 0.1) calc(var(--scroll-percent) + 30%) /* Doesn't dim until 30% down */
             );
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             
-            /* Add a glowing shadow that moves with the scroll */
             filter: drop-shadow(0 0 10px rgba(255, 235, 59, 0.3));
             transition: filter 0.3s;
         }
