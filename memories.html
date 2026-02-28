@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Memories</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Poor+Story');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap');
+
+        :root {
+            --scroll-percent: 0%;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: #050510; 
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            color: white;
+            padding-bottom: 70vh; 
+        }
+
+        #starCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px;
+        }
+
+        /* --- POLAROID DESIGN --- */
+        .item {
+            position: absolute;
+            width: 280px;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+            opacity: 0;
+            transform: translateY(50px) scale(0.9) grayscale(100%);
+        }
+
+        /* When the polaroid "scrolls" into view */
+        .item.reveal {
+            opacity: 1;
+            transform: translateY(0) scale(1) rotate(var(--rotation)) !important;
+            filter: grayscale(0%);
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 1rem 1rem 3rem 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            position: relative; 
+            overflow: hidden;
+        }
+
+        /* Camera Flash Effect */
+        .item.reveal .polaroid::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            opacity: 0;
+            animation: cameraFlash 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes cameraFlash {
+            0% { opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .caption {
+            font-family: 'Poor Story', cursive;
+            font-size: 1.4rem;
+            text-align: center;
+            margin-top: 15px;
+            color: #333;
+        }
+
+        /* Side Placement */
+        .p1 { --rotation: 5deg; top: 0%; left: 2%; }
+        .p2 { --rotation: -6deg; top: 20%; right: 2%; }
+        .p3 { --rotation: 3deg; top: 40%; left: 5%; }
+        .p4 { --rotation: -4deg; top: 60%; right: 5%; }
+        .p5 { --rotation: 7deg; top: 80%; left: 2%; }
+
+        /* --- THE ROMANTIC GLOWING TEXT --- */
+        .love-letter {
+            width: 60%;
+            margin: 0 auto;
+            font-family: 'Caveat', cursive;
+            font-size: 3rem;
+            line-height: 1.8;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            
+            /* Gradient for the "Light" effect */
+            background: linear-gradient(
+                to bottom,
+                #fff 0%, 
+                #ffeb3b calc(var(--scroll-percent) - 5%), 
+                #fff calc(var(--scroll-percent)),
+                rgba(255, 255, 255, 0.1) calc(var(--scroll-percent) + 5%)
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            
+            /* Add a glowing shadow that moves with the scroll */
+            filter: drop-shadow(0 0 10px rgba(255, 235, 59, 0.3));
+            transition: filter 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .love-letter { width: 90%; font-size: 2rem; }
+            .item { width: 160px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="starCanvas"></canvas>
+
+    <div class="container">
+        <div class="item p1"><div class="polaroid"><img src="photo1.jpeg"><div class="caption">The start of us</div></div></div>
+        <div class="item p2"><div class="polaroid"><img src="photo2.jpeg"><div class="caption">Favorite moment</div></div></div>
+        <div class="item p3"><div class="polaroid"><img src="photo3.jpeg"><div class="caption">You're so beautiful</div></div></div>
+        <div class="item p4"><div class="polaroid"><img src="photo4.jpeg"><div class="caption">Us being silly</div></div></div>
+        <div class="item p5"><div class="polaroid"><img src="photo5.jpeg"><div class="caption">Forever with you</div></div></div>
+
+        <div class="love-letter" id="letter">
+            Hi Bebe,<br><br>
+            Happy 5th Monthsary! Talaga naman tinatagan nating parehas.<br><br>
+            Salamat bebe sa pagiging liwanag at gabay ko sa mundong ito.<br><br>
+            Sa mga bawat sandali na pinagsamahan natin si hirap o ginhawa.<br><br>
+            Bawat sadaling yon ay naging isang malaking parte ng buhay ko.<br><br>
+            Thank you for being you, and thank you for being mine.<br><br>
+            I love you so, so much. Here is to many more months, years, and a lifetime together.<br><br>
+            Forever yours,<br>
+            Your bebe, Teno
+        </div>
+    </div>
+
+<audio id="bg-music" autoplay loop muted>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+
+        // Music
+        document.body.addEventListener('click', function () {
+            var audio = document.getElementById('bg-music');
+            audio.muted = false;
+            audio.play();
+        });
+        
+        // --- 1. ENHANCED STARS & COMETS ---
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let comets = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 250; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5,
+                    offset: Math.random() * 10
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Twinkling stars
+            stars.forEach(s => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + Math.abs(Math.sin(Date.now() * 0.001 + s.offset))})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Random Comets
+            if (Math.random() < 0.015) {
+                comets.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * (canvas.height / 2),
+                    v: Math.random() * 5 + 5,
+                    len: Math.random() * 100 + 50
+                });
+            }
+
+            ctx.lineWidth = 1.5;
+            comets = comets.filter(c => {
+                let grad = ctx.createLinearGradient(c.x, c.y, c.x - c.len, c.y - c.len);
+                grad.addColorStop(0, 'rgba(255,255,255,0.8)');
+                grad.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.strokeStyle = grad;
+                ctx.beginPath();
+                ctx.moveTo(c.x, c.y);
+                ctx.lineTo(c.x - c.len, c.y - c.len);
+                ctx.stroke();
+                c.x += c.v; c.y += c.v;
+                return c.y < canvas.height && c.x < canvas.width;
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        initCanvas();
+        draw();
+        window.addEventListener('resize', initCanvas);
+
+        // --- 2. SCROLL LOGIC ---
+        let scrolling = true;
+        function updateScroll() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.documentElement.style.setProperty('--scroll-percent', `${scrollPercent}%`);
+        }
+
+        window.addEventListener('scroll', updateScroll);
+
+        function autoScroll() {
+            if (scrolling) {
+                window.scrollBy(0, 0.7);
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) scrolling = false;
+            }
+            requestAnimationFrame(autoScroll);
+        }
+        setTimeout(autoScroll, 2500);
+
+        // --- 3. POLAROID REVEAL ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal');
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.item').forEach(item => observer.observe(item));
+
+        // Interaction stops auto-scroll
+        ['mousedown', 'wheel', 'touchstart'].forEach(e => 
+            window.addEventListener(e, () => scrolling = false, {once: true})
+        );
+    </script>
+</body>
+</html>
